@@ -2,21 +2,156 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>로이로라 사진 맞추기 게임</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>로이로라 맞추기 게임</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      text-align: center;
+      font-family: 'Apple SD Gothic Neo', sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 1em;
+    }
+
+    h1 {
+      font-size: 6vw;
+      margin-bottom: 1em;
+    }
+
+    img {
+      width: 100%;
+      max-width: 400px;
+      height: auto;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      margin-bottom: 1em;
+    }
+
+    .button-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1em;
+      max-width: 400px;
+      margin: 0 auto 1.5em;
+    }
+
+    button {
+      padding: 1em;
+      font-size: 5vw;
+      max-width: 100%;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.1s ease;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    #btnRoi {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    #btnLora {
+      background-color: #2196F3;
+      color: white;
+    }
+
+    #resultArea h2 {
+      font-size: 5vw;
+      color: #333;
+    }
+
+    @media (min-width: 768px) {
+      h1 {
+        font-size: 32px;
+      }
+
+      button {
+        font-size: 20px;
+      }
+
+      #resultArea h2 {
+        font-size: 24px;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h1>로이인지 로라인지 맞춰보세요!</h1>
-  <img id="photo" src="" alt="게임 이미지" />
-  <div class="buttons">
-    <button onclick="checkAnswer('로이')">로이</button>
-    <button onclick="checkAnswer('로라')">로라</button>
-  </div>
-  <p id="resultText"></p>
-  <button id="nextBtn" onclick="nextImage()" style="display: none;">다음</button>
-  <button id="restartBtn" onclick="restartGame()" style="display: none;">다시 시작</button>
+  <h1>로이로라 맞추기 게임</h1>
 
-  <script src="script.js"></script>
+  <div id="gameArea">
+    <img id="questionImage" src="" alt="문제 이미지" />
+    <div class="button-container">
+      <button id="btnRoi" onclick="selectAnswer('로이')">로이</button>
+      <button id="btnLora" onclick="selectAnswer('로라')">로라</button>
+    </div>
+  </div>
+
+  <div id="resultArea" style="display: none;"></div>
+
+  <script>
+    const imageList = [
+      "images/roi1.jpeg",
+      "images/roi2.jpeg",
+      "images/roi3.jpeg",
+      "images/lora1.jpeg",
+      "images/lora2.jpeg",
+      "images/lora3.jpeg",
+      "images/lora4.jpeg",
+      "images/lora5.jpeg"
+    ];
+
+    let currentQuestion = 0;
+    let correctCount = 0;
+
+    const shuffledImages = imageList.sort(() => 0.5 - Math.random());
+
+    function getAnswerFromFilename(filename) {
+      if (filename.includes("roi")) return "로이";
+      if (filename.includes("lora")) return "로라";
+      return "";
+    }
+
+    function showQuestion() {
+      if (currentQuestion >= shuffledImages.length) {
+        showResult();
+        return;
+      }
+
+      const img = document.getElementById("questionImage");
+      img.src = shuffledImages[currentQuestion];
+    }
+
+    function selectAnswer(choice) {
+      const correctAnswer = getAnswerFromFilename(shuffledImages[currentQuestion]);
+      if (choice === correctAnswer) {
+        correctCount++;
+      }
+
+      currentQuestion++;
+      showQuestion();
+    }
+
+    function showResult() {
+      document.getElementById("gameArea").style.display = "none";
+      const resultArea = document.getElementById("resultArea");
+      resultArea.style.display = "block";
+
+      if (correctCount === shuffledImages.length) {
+        resultArea.innerHTML = `<h2>🎉 당신은 우리의 가족이네요!</h2>`;
+      } else {
+        resultArea.innerHTML = `<h2>😭 모두 맞추지 못한 당신은 나의 가족이 아니에요 ㅠ</h2>`;
+      }
+    }
+
+    window.onload = showQuestion;
+  </script>
 </body>
 </html>
