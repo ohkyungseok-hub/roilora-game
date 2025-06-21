@@ -2,116 +2,99 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>로이로라 맞추기 게임</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     body {
-      text-align: center;
       font-family: 'Apple SD Gothic Neo', sans-serif;
+      text-align: center;
       background-color: #f0f0f0;
-      margin: 0;
-      padding: 1em;
+      margin: 0; padding: 1em;
     }
-
-    h1 {
-      font-size: 6vw;
-      margin-bottom: 1em;
-    }
-
+    h1 { font-size: 6vw; margin-bottom: 1em; }
     img {
-      width: 100%;
-      max-width: 400px;
-      height: auto;
+      width: 100%; max-width: 400px; height: auto;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.2);
       margin-bottom: 1em;
     }
-
     .button-container {
-      display: flex;
-      flex-direction: column;
-      gap: 1em;
-      max-width: 400px;
-      margin: 0 auto 1.5em;
+      display: flex; flex-direction: column; gap: 1em;
+      max-width: 400px; margin: 0 auto 1.5em;
     }
-
     button {
-      padding: 1em;
-      font-size: 5vw;
-      max-width: 100%;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: transform 0.1s ease;
+      padding: 1em; font-size: 5vw;
+      max-width: 100%; border: none; border-radius: 8px;
+      cursor: pointer; transition: transform 0.1s ease;
     }
-
-    button:hover {
-      transform: scale(1.05);
+    button:hover { transform: scale(1.05); }
+    #btnRoi { background-color: #4CAF50; color: white; }
+    #btnLora { background-color: #2196F3; color: white; }
+    #feedback { font-size: 5vw; font-weight: bold; margin-bottom: 10px; }
+    #score { font-size: 4vw; margin-bottom: 20px; color: #333; }
+    #resultArea h2 { font-size: 5vw; color: #333; margin-bottom: 1em; }
+    .extra-buttons {
+      display: flex; justify-content: center;
+      gap: 10px; flex-wrap: wrap;
     }
-
-    #btnRoi {
-      background-color: #4CAF50;
-      color: white;
+    .extra-buttons button {
+      background-color: #ff9800; color: white;
+      font-size: 4vw;
     }
-
-    #btnLora {
-      background-color: #2196F3;
-      color: white;
+    #certificate {
+      margin-top: 20px; padding: 1em; border: 2px dashed #333;
+      font-size: 4vw; color: #555;
     }
-
-    #resultArea h2 {
-      font-size: 5vw;
-      color: #333;
-    }
-
     @media (min-width: 768px) {
-      h1 {
-        font-size: 32px;
-      }
-
-      button {
-        font-size: 20px;
-      }
-
-      #resultArea h2 {
-        font-size: 24px;
-      }
+      h1 { font-size: 32px; }
+      button, .extra-buttons button { font-size: 20px; }
+      #feedback, #score { font-size: 20px; }
+      #resultArea h2 { font-size: 24px; }
+      #certificate { font-size: 18px; }
     }
   </style>
 </head>
 <body>
-  <h1>로이로라 맞추기 게임</h1>
+  <h1>로이로라 맞추기 게임
+      부제: 못맞추면 가족 아님
+  </h1>
 
   <div id="gameArea">
+    <div id="feedback"></div>
     <img id="questionImage" src="" alt="문제 이미지" />
     <div class="button-container">
       <button id="btnRoi" onclick="selectAnswer('로이')">로이</button>
       <button id="btnLora" onclick="selectAnswer('로라')">로라</button>
     </div>
+    <div id="score">정답: 0 / 0</div>
   </div>
 
-  <div id="resultArea" style="display: none;"></div>
+  <div id="resultArea" style="display: none;">
+    <h2 id="finalMessage"></h2>
+    <div class="extra-buttons">
+      <button onclick="restartGame()">다시하기</button>
+    </div>
+    <div id="certificate"></div>
+  </div>
+
+  <audio id="soundCorrect" src="audio/correct.mp3" preload="auto"></audio>
+  <audio id="soundWrong" src="audio/wrong.mp3" preload="auto"></audio>
 
   <script>
     const imageList = [
-      "images/roi1.jpeg",
-      "images/roi2.jpeg",
-      "images/roi3.jpeg",
-      "images/lora1.jpeg",
-      "images/lora2.jpeg",
-      "images/lora3.jpeg",
-      "images/lora4.jpeg",
-      "images/lora5.jpeg"
+      "images/roi1.jpeg", "images/roi2.jpeg", "images/roi3.jpeg",
+      "images/lora1.jpeg", "images/lora2.jpeg", "images/lora3.jpeg",
+      "images/lora4.jpeg", "images/lora5.jpeg"
     ];
 
     let currentQuestion = 0;
     let correctCount = 0;
+    let shuffledImages = [];
 
-    const shuffledImages = imageList.sort(() => 0.5 - Math.random());
+    function shuffle(array) {
+      return array.sort(() => 0.5 - Math.random());
+    }
 
     function getAnswerFromFilename(filename) {
       if (filename.includes("roi")) return "로이";
@@ -124,34 +107,65 @@
         showResult();
         return;
       }
-
-      const img = document.getElementById("questionImage");
-      img.src = shuffledImages[currentQuestion];
+      document.getElementById("feedback").innerText = "";
+      document.getElementById("questionImage").src = shuffledImages[currentQuestion];
+      updateScore();
     }
 
     function selectAnswer(choice) {
       const correctAnswer = getAnswerFromFilename(shuffledImages[currentQuestion]);
+      const feedback = document.getElementById("feedback");
+      const soundCorrect = document.getElementById("soundCorrect");
+      const soundWrong = document.getElementById("soundWrong");
+
       if (choice === correctAnswer) {
         correctCount++;
+        feedback.innerText = "✅ 정답입니다!";
+        feedback.style.color = "green";
+        soundCorrect.play();
+      } else {
+        feedback.innerText = "❌ 오답입니다!";
+        feedback.style.color = "red";
+        soundWrong.play();
       }
-
       currentQuestion++;
-      showQuestion();
+      updateScore();
+      setTimeout(showQuestion, 1000);
+    }
+
+    function updateScore() {
+      document.getElementById("score").innerText = `정답: ${correctCount} / ${currentQuestion}`;
     }
 
     function showResult() {
       document.getElementById("gameArea").style.display = "none";
       const resultArea = document.getElementById("resultArea");
-      resultArea.style.display = "block";
+      const msg = document.getElementById("finalMessage");
+      const cert = document.getElementById("certificate");
 
+      resultArea.style.display = "block";
       if (correctCount === shuffledImages.length) {
-        resultArea.innerHTML = `<h2>🎉 당신은 우리의 가족이네요!</h2>`;
+        msg.innerHTML = `🎉 당신은 우리의 가족이네요!`;
+        cert.innerHTML = `📜 가족 인증서 발급 완료!<br>축하합니다!`;
       } else {
-        resultArea.innerHTML = `<h2>😭 모두 맞추지 못한 당신은 나의 가족이 아니에요 ㅠ</h2>`;
+        msg.innerHTML = `😭 모두 맞추지 못한 당신은 나의 가족이 아니에요 ㅠ`;
+        cert.innerHTML = "";
       }
     }
 
-    window.onload = showQuestion;
+    function restartGame() {
+      currentQuestion = 0;
+      correctCount = 0;
+      shuffledImages = shuffle([...imageList]);
+      document.getElementById("gameArea").style.display = "block";
+      document.getElementById("resultArea").style.display = "none";
+      showQuestion();
+    }
+
+    window.onload = () => {
+      shuffledImages = shuffle([...imageList]);
+      showQuestion();
+    }
   </script>
 </body>
 </html>
