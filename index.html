@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>로이 로라 맞추기 게임</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="game-container">
+    <!-- 1. 게임 제목 -->
+    <h1>로이/로라 맞추기 게임</h1>
+    
+    <!-- 2. 게임 시작 화면 -->
+    <div id="start-screen">
+      <p>사진을 보고 <strong>로이</strong>인지 <strong>로라</strong>인지 맞춰보세요!</p>
+      <button id="start-button">게임 시작</button>
+    </div>
+    
+    <!-- 3. 퀴즈 진행 화면 (초기에는 display:none 으로 숨김) -->
+    <div id="game-screen" style="display: none;">
+      <!-- 현재까지 맞힌 개수 표시 -->
+      <div id="scoreboard">점수: 0</div>
+      <!-- 이미지 표시 영역 -->
+      <div id="image-container">
+        <img id="current-image" src="" alt="문제 이미지" />
+      </div>
+      <!-- 정답 선택 버튼들 -->
+      <div id="buttons">
+        <button id="btn-roy">로이</button>
+        <button id="btn-laura">로라</button>
+      </div>
+      <!-- 정답 여부 피드백 메시지 -->
+      <p id="feedback"></p>
+      <!-- 다음 문제로 넘어가는 버튼 (정답 선택 후 표시) -->
+      <button id="next-button" style="display: none;">다음 문제</button>
+    </div>
+    
+    <!-- 4. 게임 종료 화면 (초기에는 숨김) -->
+    <div id="end-screen" style="display: none;">
+      <p id="final-score"></p>
+      <button id="restart-button">다시 시작</button>
+    </div>
+  </div>
+  
+  <!-- 자바스크립트 파일 포함 -->
+  <script src="script.js"></script>
+</body>
+</html>
