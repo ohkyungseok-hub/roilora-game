@@ -34,4 +34,15 @@ const images = [
   
   // 시작 시 이미지 표시
   window.onload = showImage;
+  function showResult() {
+    const resultText = correctCount === quizImages.length
+      ? "🎉 당신은 우리의 가족이네요!"
+      : "😭 모두 맞추지 못한 당신은 나의 가족이 아니예요 ㅠ";
+  
+    document.getElementById("photo").style.display = "none";
+    document.querySelector(".buttons").style.display = "none";
+    document.getElementById("resultText").innerText = resultText;
+    document.getElementById("nextBtn").style.display = "none";
+    document.getElementById("restartBtn").style.display = "inline-block";
+  }
   
